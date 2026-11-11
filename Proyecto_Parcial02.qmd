@@ -1,0 +1,475 @@
+---
+title: "Factores económicos asociados al precio de la vivienda en México, 2020-2025"
+subtitle: "Programa que reproduce las tablas del artículo · Econometría"
+author:
+  - Luis Manuel Duran
+  - Arthur Alonso Luna
+  - Miguel Angel Becerra
+date: today
+date-format: "D [de] MMMM [de] YYYY"
+lang: es
+format:
+  html:
+    theme: cosmo
+    grid:
+      body-width: 960px
+      sidebar-width: 260px
+      margin-width: 120px
+    toc: true
+    toc-location: left
+    toc-depth: 2
+    toc-title: "Contenido"
+    number-sections: true
+    code-fold: true
+    code-summary: "Ver código"
+    code-tools:
+      source: false
+      toggle: true
+      caption: "Código"
+    highlight-style: github
+    title-block-banner: "#1F3B5C"
+    title-block-banner-color: "#FFFFFF"
+    fig-align: center
+    fig-cap-location: top
+    tbl-cap-location: top
+    smooth-scroll: true
+    embed-resources: true
+    include-in-header:
+      text: |
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <style>
+          :root { --azul: #1F3B5C; --verde: #2E7D7A; --ocre: #C08A2B; --gris: #5F6B7A; }
+          body { font-family: "Inter", "Segoe UI", Arial, sans-serif; font-size: 15.5px;
+                 line-height: 1.65; color: #1E2430; }
+          h1, h2, h3 { font-weight: 700; color: var(--azul); letter-spacing: -0.01em; }
+          h1.title { color: #FFFFFF; font-size: 2.1rem; }
+          .quarto-title-banner .subtitle { color: #D6E2F0; font-weight: 400; }
+          h2 { border-bottom: 2px solid #E3E8EF; padding-bottom: .35rem; margin-top: 2.6rem; }
+          h3 { font-size: 1.15rem; margin-top: 1.8rem; }
+          .table { font-size: 13.5px; margin: .5rem auto 1.2rem auto; }
+          .table thead th { background: var(--azul) !important; color: #FFF !important;
+                            font-weight: 600; border: none !important; }
+          .table caption, .table-caption { color: var(--gris); font-size: 13.5px; }
+          caption { caption-side: top; color: var(--gris); font-weight: 500; }
+          .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+                      gap: 14px; margin: 1.2rem 0 1.8rem 0; }
+          .kpi { background: #F6F8FB; border: 1px solid #E3E8EF; border-left: 4px solid var(--azul);
+                 border-radius: 8px; padding: 14px 16px; }
+          .kpi .valor { font-size: 1.55rem; font-weight: 700; color: var(--azul); line-height: 1.2; }
+          .kpi .etiqueta { font-size: 12.5px; color: var(--gris); margin-top: 4px; }
+          .kpi.verde { border-left-color: var(--verde); } .kpi.verde .valor { color: var(--verde); }
+          .kpi.ocre  { border-left-color: var(--ocre); }  .kpi.ocre .valor  { color: var(--ocre); }
+          .ecuacion { background: #F6F8FB; border-radius: 8px; padding: .3rem 1rem; margin: 1rem 0; }
+          .sig  { color: #1B7F4B; font-weight: 600; }
+          .nosig { color: #8A94A3; }
+          details.code-fold summary { color: var(--gris); font-size: 13px; }
+          .callout { font-size: 14.5px; }
+          .tabla-nota { font-size: 12.5px; color: var(--gris); margin: -0.6rem auto 1.8rem auto;
+                        text-align: center; }
+          .table td, .table th { white-space: normal; vertical-align: middle; }
+          figure img { border-radius: 6px; }
+        </style>
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+# =============================================================================
+#  PROGRAMA QUE REPRODUCE LAS TABLAS DEL ARTÍCULO
+#  "Factores económicos asociados al comportamiento de los precios de la
+#   vivienda en México durante el periodo 2020-2025"
+#
+#  Coloque este .qmd junto a la carpeta "datos/" con:
+#   - registro_viv_2020.csv ... registro_viv_2025.csv  (SNIIV, separados por ;)
+#   - Indice_SHF_datos_abiertos_2_trim_2026.xlsx  (SHF, índice base 2017 = 100)
+#   - Precios_al_productor_de_vivienda_annual_variation_2020_2026.csv (INEGI)
+#   - Precios_de_los_créditos_hipotecarios_interest_rate_2020_2025.csv (Banxico)
+#  Presione "Render". Las tablas se guardan en "tablas/" y las figuras en "figuras/".
+# =============================================================================
+knitr::opts_chunk$set(fig.width = 9, fig.height = 5, dpi = 200, out.width = "100%")
+```
+
+```{r}
+#| label: librerias
+#| code-summary: "Ver código: librerías y funciones auxiliares"
+paquetes <- c("tidyverse", "lubridate", "scales", "lmtest", "car", "tseries",
+              "knitr", "kableExtra", "readxl")
+faltan <- setdiff(paquetes, rownames(installed.packages()))
+if (length(faltan) > 0) install.packages(faltan)
+
+suppressPackageStartupMessages({
+  library(tidyverse); library(lubridate); library(scales)
+  library(lmtest)     # bptest (Breusch-Pagan-Godfrey clásica), dwtest
+  library(car)        # vif
+  library(tseries)    # jarque.bera.test
+  library(knitr); library(kableExtra)
+})
+options(scipen = 999, knitr.kable.NA = "")
+alfa <- 0.05
+dL   <- 1.013    # límite inferior de Durbin-Watson: n = 24, k' = 4, α = 5 %
+dir.create("tablas",  showWarnings = FALSE)
+dir.create("figuras", showWarnings = FALSE)
+guardar <- function(df, nombre) {
+  write_csv(df, file.path("tablas", paste0(nombre, ".csv"))); invisible(df)
+}
+
+fmt_p <- function(p) ifelse(is.na(p), "", ifelse(p < 0.001, "< 0.001",
+                                                 formatC(p, format = "f", digits = 3)))
+fmt_n <- function(x, d = 2) {
+  ifelse(is.na(x), "",
+         ifelse(abs(x) >= 1000, formatC(x, format = "f", digits = 0, big.mark = ","),
+                formatC(x, format = "f", digits = d, big.mark = ",")))
+}
+con_nota <- function(k, nota) {
+  structure(paste0(k, '\n<p class="tabla-nota"><em>Nota:</em> ', nota, "</p>"),
+            format = "html", class = "knitr_kable")
+}
+tabla <- function(df, titulo = NULL, digitos = 2, nota = NULL, ancho = FALSE,
+                  nombres = NULL) {
+  out <- df
+  for (j in seq_along(out)) {
+    x <- out[[j]]
+    if (is.numeric(x)) out[[j]] <- fmt_n(x, digitos)
+    if (is.factor(x))  out[[j]] <- as.character(x)
+  }
+  if (!is.null(nombres)) names(out) <- nombres
+  alin <- ifelse(sapply(df, is.numeric), "r", "l")
+  k <- kbl(out, caption = titulo, escape = FALSE, align = alin) %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                  full_width = ancho, position = "center")
+  if (!is.null(nota)) k <- con_nota(k, nota)
+  k
+}
+paleta <- c("#1F3B5C", "#2E7D7A", "#C08A2B", "#8C2F39")
+tema <- theme_minimal(base_size = 13) +
+  theme(plot.title = element_text(face = "bold", color = "#1F3B5C"),
+        plot.caption = element_text(color = "grey45", hjust = 0, size = 9.5),
+        strip.text = element_text(face = "bold", color = "#1F3B5C"),
+        panel.grid.minor = element_blank(),
+        plot.background = element_rect(fill = "white", color = NA))
+fuente <- "Fuente: elaboración propia con datos de SHF, SNIIV-SEDATU, INEGI y Banco de México."
+```
+
+::: {.callout-tip appearance="simple"}
+## Qué hace este programa
+Construye la base trimestral 2020-I a 2025-IV (n = 24), estima los modelos lineal y
+logarítmico del artículo, valida sus supuestos y calcula los escenarios de predicción.
+Cada tabla corresponde a una tabla del artículo.
+:::
+
+# Obtención y tratamiento de los datos
+
+```{r}
+#| label: lectura
+#| code-summary: "Ver código: lectura de las cuatro fuentes"
+carpeta <- if (dir.exists("datos")) "datos" else "."
+
+# ---- O: oferta de vivienda privada (SNIIV) ----------------------------------
+archivos_viv <- list.files(carpeta, pattern = "^registro_viv_.*\\.csv$", full.names = TRUE)
+if (length(archivos_viv) == 0) stop("No se encontraron archivos registro_viv_*.csv", call. = FALSE)
+
+leer_registro <- function(archivo) {
+  bytes <- readBin(archivo, "raw", n = file.info(archivo)$size)
+  enc   <- if (validUTF8(rawToChar(bytes[bytes != as.raw(0)]))) "UTF-8" else "latin1"
+  linea1 <- readLines(archivo, n = 1, encoding = enc, warn = FALSE)
+  delim  <- if (str_count(linea1, ";") >= str_count(linea1, ",")) ";" else ","
+  df <- read_delim(archivo, delim = delim, locale = locale(encoding = enc),
+                   col_types = cols(.default = col_character()), trim_ws = TRUE,
+                   show_col_types = FALSE)
+  names(df) <- names(df) %>% str_remove("^\\ufeff") %>% str_remove("^ï»¿") %>%
+    str_trim() %>% str_to_lower()
+  df %>% select(anio_registro, cve_mes, tipo_productor, viviendas)
+}
+viv <- map_dfr(archivos_viv, leer_registro) %>%
+  mutate(anio = as.integer(parse_number(anio_registro)),
+         trimestre = (as.integer(parse_number(cve_mes)) - 1) %/% 3 + 1,
+         viviendas = parse_number(viviendas),
+         privado = str_detect(str_to_lower(tipo_productor), "privad"))
+
+pvb_excluidas <- sum(viv$viviendas[!viv$privado], na.rm = TRUE)   # Vivienda para el Bienestar
+oferta <- viv %>%
+  filter(privado, !is.na(viviendas)) %>%
+  group_by(anio, trimestre) %>%
+  summarise(O = sum(viviendas), .groups = "drop")          # suma trimestral
+
+# ---- C: costo de construcción (INEGI, INPP, serie 1801007) ------------------
+archivo_inpp <- list.files(carpeta, pattern = "Precios_al_productor", full.names = TRUE)[1]
+costos <- read_csv(archivo_inpp, show_col_types = FALSE) %>%
+  filter(indicatorId == 1801007, year <= 2025) %>%
+  mutate(trimestre = (month - 1) %/% 3 + 1) %>%
+  group_by(anio = year, trimestre) %>%
+  summarise(C = mean(value), .groups = "drop")             # promedio trimestral
+
+# ---- I: tasa hipotecaria promedio (Banxico, SF43426) ------------------------
+archivo_tasa <- list.files(carpeta, pattern = "interest_rate", full.names = TRUE)[1]
+tasa <- read_csv(archivo_tasa, show_col_types = FALSE) %>%
+  filter(indicatorName == "Promedio") %>%
+  mutate(fecha = dmy(period)) %>%
+  group_by(anio = year(fecha), trimestre = quarter(fecha)) %>%
+  summarise(I = mean(value), .groups = "drop")             # promedio trimestral
+
+# ---- P: Índice SHF de precios de la vivienda (base 2017 = 100) --------------
+#  Archivo de datos abiertos de la SHF (2.º trimestre de 2026). Se toma la serie
+#  "Nacional" (sin estado ni municipio), 2020-I a 2025-IV.
+archivo_shf <- list.files(carpeta, pattern = "^Indice_SHF.*\\.xlsx$", full.names = TRUE)[1]
+if (is.na(archivo_shf)) stop("Falta el archivo Indice_SHF_datos_abiertos_*.xlsx en datos/", call. = FALSE)
+shf_raw <- readxl::read_excel(archivo_shf)
+names(shf_raw) <- c("consecutivo", "global", "estado", "municipio", "trimestre", "anio", "indice")
+precio <- shf_raw %>%
+  filter(global == "Nacional", is.na(estado), is.na(municipio), anio >= 2020, anio <= 2025) %>%
+  transmute(anio = as.integer(anio), trimestre = as.integer(trimestre), P = as.numeric(indice))
+
+# ---- Base trimestral --------------------------------------------------------
+base <- precio %>%
+  inner_join(oferta, by = c("anio", "trimestre")) %>%
+  inner_join(costos, by = c("anio", "trimestre")) %>%
+  inner_join(tasa,   by = c("anio", "trimestre")) %>%
+  arrange(anio, trimestre) %>%
+  mutate(periodo = paste0(anio, "-", c("I", "II", "III", "IV")[trimestre]),
+         fecha   = make_date(anio, trimestre * 3 - 1, 15),
+         D       = as.integer(periodo == "2021-III"))      # registro atípico
+stopifnot(nrow(base) == 24, !anyNA(base))
+guardar(base, "00_base_trimestral")
+```
+
+La base tiene **`r nrow(base)` trimestres** (`r base$periodo[1]` a `r base$periodo[nrow(base)]`).
+Se excluyeron **`r comma(pvb_excluidas)` viviendas** del Programa Vivienda para el Bienestar y
+el registro atípico de 2021-III (`r comma(base$O[base$D == 1])` viviendas) se controla con la
+variable dicótoma D.
+
+```{r}
+#| label: tabla1
+#| code-summary: "Ver código: Tabla 1"
+tabla1 <- tibble(
+  Variable = c("P", "O", "C", "I"),
+  Fuente = c("SHF, Índice de Precios de la Vivienda", "SEDATU, SNIIV, registro de vivienda",
+             "INEGI, Índice Nacional de Precios Productor", "Banco de México, serie SF43426"),
+  Tratamiento = c("Índice nacional trimestral, base 2017 = 100",
+                  "Suma trimestral de registros mensuales; sólo productores privados",
+                  "Promedio trimestral de la variación anual mensual (%)",
+                  "Promedio trimestral de la tasa mensual (%)"))
+guardar(tabla1, "tabla1_variables")
+tabla(tabla1, "Tabla 1. Variables, fuentes y tratamiento", ancho = TRUE)
+```
+
+# Análisis exploratorio
+
+```{r}
+#| label: tabla2
+#| code-summary: "Ver código: Tabla 2 (descriptivos)"
+desc <- function(x) c(mean(x), sd(x), min(x), max(x))
+tabla2 <- tibble(Variable = c("P (índice)", "O (viviendas)", "C (%)", "I (%)"),
+                 as_tibble(rbind(desc(base$P), desc(base$O), desc(base$C), desc(base$I)),
+                           .name_repair = ~ c("Media", "Desv. est.", "Mínimo", "Máximo")))
+guardar(tabla2, "tabla2_descriptivos")
+tabla(tabla2, "Tabla 2. Estadísticos descriptivos (n = 24)")
+
+var_total <- 100 * (base$P[24] / base$P[1] - 1)
+
+# Viviendas particulares habitadas (INEGI, censo 2020 y EIC 2025), para comparar
+archivo_hab <- list.files(carpeta, pattern = "viviendas_habitadas", full.names = TRUE)[1]
+var_hab <- NA
+if (!is.na(archivo_hab)) {
+  hab <- readxl::read_excel(archivo_hab, col_names = FALSE, .name_repair = "minimal")
+  hab <- tibble(anio = suppressWarnings(as.integer(hab[[1]])),
+                viv  = suppressWarnings(as.numeric(hab[[3]]))) %>% filter(!is.na(anio), !is.na(viv))
+  var_hab <- 100 * (hab$viv[hab$anio == 2025] / hab$viv[hab$anio == 2020] - 1)
+}
+var_oferta <- 100 * (sum(base$O[base$anio == 2025]) / sum(base$O[base$anio == 2020]) - 1)
+correl <- cor(base[, c("P", "O", "C", "I")])
+```
+
+Entre `r base$periodo[1]` y `r base$periodo[24]` el índice de precios aumentó
+**`r round(var_total, 1)` %**, mientras que las viviendas particulares habitadas crecieron
+`r round(var_hab, 1)` % (INEGI) y el registro anual de vivienda privada cambió
+`r round(var_oferta, 1)` % (2020 contra 2025). La tasa hipotecaria pasó de `r round(base$I[1], 2)` % a
+`r round(base$I[24], 2)` %. El precio se correlaciona con la tasa (r = `r round(correl["P","I"], 2)`),
+con los costos (r = `r round(correl["P","C"], 2)`) y con la oferta (r = `r round(correl["P","O"], 2)`).
+
+```{r}
+#| label: correlaciones
+#| code-summary: "Ver código: matriz de correlaciones"
+correl_df <- as_tibble(correl, rownames = "Variable")
+guardar(correl_df, "correlaciones")
+tabla(correl_df, "Matriz de correlaciones")
+```
+
+```{r}
+#| label: fig-evolucion
+#| fig-cap: "Evolución trimestral de las variables, 2020-2025"
+#| fig-height: 6.5
+#| code-summary: "Ver código: gráfica de evolución"
+g1 <- base %>%
+  select(fecha, `P: índice de precios` = P, `O: oferta privada` = O,
+         `C: costos (var. anual %)` = C, `I: tasa hipotecaria (%)` = I) %>%
+  pivot_longer(-fecha) %>%
+  ggplot(aes(fecha, value)) +
+  geom_line(color = paleta[1], linewidth = 1) + geom_point(color = paleta[1], size = 1.6) +
+  facet_wrap(~ name, scales = "free_y", ncol = 2) +
+  scale_y_continuous(labels = label_comma()) +
+  labs(x = NULL, y = NULL, caption = fuente) + tema
+ggsave("figuras/fig1_evolucion_trimestral.png", g1, width = 10, height = 6.5, dpi = 300, bg = "white")
+g1
+```
+
+# Estimación de los modelos
+
+Ecuación 1: $P_t = \beta_0 + \beta_1 O_t + \beta_2 C_t + \beta_3 I_t + \beta_4 D_t + u_t$
+
+Ecuación 2: $\ln P_t = \beta_0 + \beta_1 \ln O_t + \beta_2 C_t + \beta_3 I_t + \beta_4 D_t + u_t$
+
+```{r}
+#| label: modelos
+#| code-summary: "Ver código: estimación y pruebas"
+m1 <- lm(P ~ O + C + I + D, data = base)
+m2 <- lm(log(P) ~ log(O) + C + I + D, data = base)
+
+# p-valores de una cola según la hipótesis (H1: β1 < 0, H2: β2 > 0, H3: β3 < 0);
+# la dicótoma se prueba a dos colas.
+p_hipotesis <- function(m) {
+  s <- summary(m)$coefficients; t <- s[, 3]; gl <- df.residual(m)
+  c(pt(t[2], gl),                       # H1: oferta, β1 < 0
+    pt(t[3], gl, lower.tail = FALSE),   # H2: costos, β2 > 0
+    pt(t[4], gl),                       # H3: tasa,   β3 < 0
+    2 * pt(-abs(t[5]), gl))             # dicótoma, dos colas
+}
+coef_ic <- function(m, d) {
+  b <- coef(m)[-1]; ic <- confint(m)[-1, ]
+  sprintf("%s [%s; %s]", formatC(b, format = "f", digits = d),
+          formatC(ic[, 1], format = "f", digits = d), formatC(ic[, 2], format = "f", digits = d))
+}
+resumen_modelo <- function(m) {
+  s <- summary(m); f <- s$fstatistic
+  list(r2 = sprintf("%.3f / %.3f", s$r.squared, s$adj.r.squared),
+       F  = sprintf("%.2f", f[1]),
+       pF = fmt_p(pf(f[1], f[2], f[3], lower.tail = FALSE)),
+       jb_bp = sprintf("%.3f / %.3f", jarque.bera.test(resid(m))$p.value, bptest(m, studentize = FALSE)$p.value),
+       dw = sprintf("%.3f", dwtest(m)$statistic),
+       fiv = sprintf("%.2f", max(vif(m))))
+}
+r1 <- resumen_modelo(m1); r2 <- resumen_modelo(m2)
+p1 <- p_hipotesis(m1);    p2 <- p_hipotesis(m2)
+```
+
+```{r}
+#| label: tabla3
+#| code-summary: "Ver código: Tabla 3 (resultados de los modelos)"
+tabla3 <- tibble(
+  ` ` = c("Oferta (H1: −)", "Costos (H2: +)", "Tasa (H3: −)", "Dummy 2021-III",
+          "R² / R² ajustada", "F", "Jarque-Bera / Breusch-Pagan (p)",
+          paste0("Durbin-Watson (dL = ", dL, ")"), "FIV máximo"),
+  `Lineal: coef. [IC 95 %]` = c(c(sprintf("%.4f [%.4f; %.4f]", coef(m1)[2], confint(m1)[2, 1], confint(m1)[2, 2])),
+                                coef_ic(m1, 3)[2:4], r1$r2, r1$F, r1$jb_bp, r1$dw, r1$fiv),
+  `p (lineal)` = c(fmt_p(p1), "", r1$pF, "", "", ""),
+  `Logarítmico: coef. [IC 95 %]` = c(coef_ic(m2, 3)[1], coef_ic(m2, 4)[2],
+                                     coef_ic(m2, 3)[3:4], r2$r2, r2$F, r2$jb_bp, r2$dw, r2$fiv),
+  `p (log)` = c(fmt_p(p2), "", r2$pF, "", "", ""))
+guardar(tabla3, "tabla3_modelos")
+tabla(tabla3, "Tabla 3. Estimación por MCO de los modelos lineal y logarítmico", ancho = TRUE,
+      nota = paste("p de una cola para H1, H2 y H3 (19 gl, α = 5 %); dos colas para la dicótoma.",
+                   "Un p cercano a 1.000 indica que el signo estimado es contrario al de la hipótesis."))
+```
+
+```{r}
+#| label: interpretacion
+#| include: false
+b1 <- coef(m1); b2 <- coef(m2)
+semi_C <- 100 * b2["C"]; semi_I <- 100 * b2["I"]; efecto_D <- 100 * (exp(b2["D"]) - 1)
+dw1 <- dwtest(m1)$statistic
+```
+
+::: {.callout-note}
+## Interpretación
+- Ambos modelos son significativos en conjunto (F = `r r1$F` y `r r2$F`; p `r r1$pF`).
+- **Oferta (H1):** coeficiente `r sprintf("%.4f", b1["O"])` en el modelo lineal; en el
+  logarítmico la elasticidad es `r round(b2["log(O)"], 3)`: un aumento de 1 % en la oferta se
+  asocia con un cambio de `r round(b2["log(O)"], 3)` % en el precio (p = `r fmt_p(p2[1])`).
+- **Costos (H2):** +1 punto en C se asocia con `r round(b1["C"], 3)` puntos del índice, o
+  `r round(semi_C, 2)` % del precio (p = `r fmt_p(p2[2])`).
+- **Tasa (H3):** +1 punto en I se asocia con `r round(b1["I"], 1)` puntos del índice, o
+  `r round(semi_I, 1)` % del precio (semielasticidad 100·β₃). El signo es positivo, contrario a H3,
+  por eso su p de una cola es `r fmt_p(p1[3])`.
+- **Dicótoma 2021-III:** efecto de `r round(efecto_D, 1)` % (100·(e^β₄ − 1)), p = `r fmt_p(p2[4])`.
+- **Autocorrelación:** d = `r round(dw1, 3)` < dL = `r dL`, por lo que las pruebas t y F pierden
+  validez; además R² (`r round(summary(m1)$r.squared, 3)`) > d sugiere una posible regresión espuria.
+:::
+
+# Validación de supuestos
+
+```{r}
+#| label: supuestos
+#| code-summary: "Ver código: pruebas de supuestos por modelo"
+supuestos <- function(m, nombre) {
+  tibble(Modelo = nombre,
+         Prueba = c("Jarque-Bera (normalidad)", "Breusch-Pagan (homocedasticidad)",
+                    "Durbin-Watson (autocorrelación)", "FIV máximo (multicolinealidad)"),
+         Estadistico = c(jarque.bera.test(resid(m))$statistic, bptest(m, studentize = FALSE)$statistic,
+                         dwtest(m)$statistic, max(vif(m))),
+         p = c(jarque.bera.test(resid(m))$p.value, bptest(m, studentize = FALSE)$p.value,
+               dwtest(m)$p.value, NA)) %>%
+    mutate(Conclusion = c(ifelse(p[1] >= alfa, "Residuos normales", "No normales"),
+                          ifelse(p[2] >= alfa, "Homocedásticos", "Heterocedásticos"),
+                          ifelse(Estadistico[3] < dL, "Autocorrelación positiva (d < dL)", "Sin evidencia de autocorrelación"),
+                          ifelse(Estadistico[4] < 10, "Sin multicolinealidad alta", "Multicolinealidad alta")))
+}
+tabla_sup <- bind_rows(supuestos(m1, "Lineal"), supuestos(m2, "Logarítmico")) %>%
+  mutate(p = fmt_p(p))
+guardar(tabla_sup, "supuestos")
+tabla(tabla_sup, "Validación de los supuestos del modelo clásico", digitos = 3, ancho = TRUE,
+      nombres = c("Modelo", "Prueba", "Estadístico", "p", "Conclusión"))
+```
+
+# Predicción
+
+```{r}
+#| label: tabla4
+#| code-summary: "Ver código: Tabla 4 (escenarios)"
+ult <- base[24, ]
+escenarios <- tibble(
+  Escenario = c(paste("A. Base", ult$periodo), "B. Tasa +1", "C. Costos +2"),
+  O = ult$O, C = ult$C + c(0, 0, 2), I = ult$I + c(0, 1, 0), D = 0)
+
+ic_txt <- function(lw, up) sprintf("[%.1f; %.1f]", lw, up)
+lm_media <- predict(m1, escenarios, interval = "confidence")
+lm_indiv <- predict(m1, escenarios, interval = "prediction")
+lg_media <- exp(predict(m2, escenarios, interval = "confidence"))   # vuelta a niveles
+lg_indiv <- exp(predict(m2, escenarios, interval = "prediction"))
+
+tabla4 <- tibble(Escenario = escenarios$Escenario,
+                 Lineal = sprintf("%.1f", lm_media[, "fit"]),
+                 `IC media` = ic_txt(lm_media[, "lwr"], lm_media[, "upr"]),
+                 `IC individual` = ic_txt(lm_indiv[, "lwr"], lm_indiv[, "upr"]),
+                 Log = sprintf("%.1f", lg_media[, "fit"]),
+                 `IC media ` = ic_txt(lg_media[, "lwr"], lg_media[, "upr"]),
+                 `IC individual ` = ic_txt(lg_indiv[, "lwr"], lg_indiv[, "upr"]))
+guardar(tabla4, "tabla4_escenarios")
+tabla(tabla4, "Tabla 4. Predicción puntual e intervalos al 95 %", ancho = TRUE,
+      nota = sprintf("Escenario base %s: O = %s; C = %.2f %%; I = %.2f %%. Valor observado: %.2f.",
+                     ult$periodo, comma(ult$O), ult$C, ult$I, ult$P))
+```
+
+::: {.callout-note}
+## Interpretación
+El valor observado en `r ult$periodo` (`r round(ult$P, 2)`)
+`r ifelse(ult$P >= lm_media[1, "lwr"] & ult$P <= lm_media[1, "upr"], "queda dentro", "queda fuera")`
+del intervalo para la media y
+`r ifelse(ult$P >= lm_indiv[1, "lwr"] & ult$P <= lm_indiv[1, "upr"], "dentro", "fuera")`
+del intervalo individual, que es más amplio porque incluye la varianza de la perturbación.
+Subir la tasa un punto eleva la predicción a `r sprintf("%.1f", lm_media[2, "fit"])`; subir los
+costos dos puntos la deja en `r sprintf("%.1f", lm_media[3, "fit"])`.
+:::
+
+::: {.callout-note collapse="true" appearance="minimal"}
+## Versión de R y paquetes
+```{r}
+#| label: sesion
+#| echo: false
+cat(R.version.string, "\n")
+cat(paste(sprintf("%s %s", paquetes, sapply(paquetes, function(p) as.character(packageVersion(p)))),
+          collapse = " · "))
+```
+:::
