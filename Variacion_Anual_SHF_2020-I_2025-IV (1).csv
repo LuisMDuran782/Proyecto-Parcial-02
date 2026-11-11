@@ -1,0 +1,124 @@
+﻿Periodo,Grupo,Categoria,Variacion anual
+2020-I,nacional,Nacional,6.95
+2020-II,nacional,Nacional,5.82
+2020-III,nacional,Nacional,5.18
+2020-IV,nacional,Nacional,5.38
+2021-I,nacional,Nacional,6.54
+2021-II,nacional,Nacional,7.91
+2021-III,nacional,Nacional,8.81
+2021-IV,nacional,Nacional,8.52
+2022-I,nacional,Nacional,7.72
+2022-II,nacional,Nacional,8.04
+2022-III,nacional,Nacional,9.43
+2022-IV,nacional,Nacional,10.33
+2023-I,nacional,Nacional,11.44
+2023-II,nacional,Nacional,11.26
+2023-III,nacional,Nacional,10.17
+2023-IV,nacional,Nacional,10
+2024-I,nacional,Nacional,9.7
+2024-II,nacional,Nacional,9.18
+2024-III,nacional,Nacional,9.13
+2024-IV,nacional,Nacional,8.74
+2025-I,nacional,Nacional,8.25
+2025-II,nacional,Nacional,8.88
+2025-III,nacional,Nacional,8.97
+2025-IV,nacional,Nacional,8.95
+2020-I,tipo_uso,Nueva,7.18
+2020-II,tipo_uso,Nueva,5.95
+2020-III,tipo_uso,Nueva,5.05
+2020-IV,tipo_uso,Nueva,4.95
+2021-I,tipo_uso,Nueva,5.97
+2021-II,tipo_uso,Nueva,7.35
+2021-III,tipo_uso,Nueva,8.6
+2021-IV,tipo_uso,Nueva,8.8
+2022-I,tipo_uso,Nueva,8.43
+2022-II,tipo_uso,Nueva,9.17
+2022-III,tipo_uso,Nueva,10.75
+2022-IV,tipo_uso,Nueva,11.8
+2023-I,tipo_uso,Nueva,13.07
+2023-II,tipo_uso,Nueva,12.74
+2023-III,tipo_uso,Nueva,11.44
+2023-IV,tipo_uso,Nueva,11.06
+2024-I,tipo_uso,Nueva,10.52
+2024-II,tipo_uso,Nueva,9.88
+2024-III,tipo_uso,Nueva,9.73
+2024-IV,tipo_uso,Nueva,9.08
+2025-I,tipo_uso,Nueva,8.43
+2025-II,tipo_uso,Nueva,9
+2025-III,tipo_uso,Nueva,9.13
+2025-IV,tipo_uso,Nueva,9.31
+2020-I,tipologia,Casa en condominio - depto.,7.25
+2020-II,tipologia,Casa en condominio - depto.,5.73
+2020-III,tipologia,Casa en condominio - depto.,4.65
+2020-IV,tipologia,Casa en condominio - depto.,4.8
+2021-I,tipologia,Casa en condominio - depto.,6.06
+2021-II,tipologia,Casa en condominio - depto.,7.66
+2021-III,tipologia,Casa en condominio - depto.,9.03
+2021-IV,tipologia,Casa en condominio - depto.,8.82
+2022-I,tipologia,Casa en condominio - depto.,8.12
+2022-II,tipologia,Casa en condominio - depto.,8.43
+2022-III,tipologia,Casa en condominio - depto.,9.63
+2022-IV,tipologia,Casa en condominio - depto.,10.42
+2023-I,tipologia,Casa en condominio - depto.,11.39
+2023-II,tipologia,Casa en condominio - depto.,10.92
+2023-III,tipologia,Casa en condominio - depto.,9.63
+2023-IV,tipologia,Casa en condominio - depto.,9.57
+2024-I,tipologia,Casa en condominio - depto.,9.41
+2024-II,tipologia,Casa en condominio - depto.,9.27
+2024-III,tipologia,Casa en condominio - depto.,9.49
+2024-IV,tipologia,Casa en condominio - depto.,8.93
+2025-I,tipologia,Casa en condominio - depto.,8.18
+2025-II,tipologia,Casa en condominio - depto.,8.51
+2025-III,tipologia,Casa en condominio - depto.,8.39
+2025-IV,tipologia,Casa en condominio - depto.,8.49
+2020-I,tipologia,Casa sola,6.68
+2020-II,tipologia,Casa sola,5.9
+2020-III,tipologia,Casa sola,5.66
+2020-IV,tipologia,Casa sola,5.91
+2021-I,tipologia,Casa sola,6.98
+2021-II,tipologia,Casa sola,8.12
+2021-III,tipologia,Casa sola,8.61
+2021-IV,tipologia,Casa sola,8.25
+2022-I,tipologia,Casa sola,7.36
+2022-II,tipologia,Casa sola,7.69
+2022-III,tipologia,Casa sola,9.25
+2022-IV,tipologia,Casa sola,10.25
+2023-I,tipologia,Casa sola,11.5
+2023-II,tipologia,Casa sola,11.57
+2023-III,tipologia,Casa sola,10.67
+2023-IV,tipologia,Casa sola,10.4
+2024-I,tipologia,Casa sola,9.95
+2024-II,tipologia,Casa sola,9.1
+2024-III,tipologia,Casa sola,8.8
+2024-IV,tipologia,Casa sola,8.57
+2025-I,tipologia,Casa sola,8.31
+2025-II,tipologia,Casa sola,9.21
+2025-III,tipologia,Casa sola,9.49
+2025-IV,tipologia,Casa sola,9.36
+2020-I,clase,Económica - Social,6.81
+2020-II,clase,Económica - Social,6.03
+2020-III,clase,Económica - Social,5.79
+2020-IV,clase,Económica - Social,6.29
+2021-I,clase,Económica - Social,7.78
+2021-II,clase,Económica - Social,9.11
+2021-III,clase,Económica - Social,9.21
+2021-IV,clase,Económica - Social,8.44
+2022-I,clase,Económica - Social,7.47
+2022-II,clase,Económica - Social,7.67
+2022-III,clase,Económica - Social,9.21
+2022-IV,clase,Económica - Social,10.28
+2023-I,clase,Económica - Social,11.2
+2023-II,clase,Económica - Social,10.78
+2023-III,clase,Económica - Social,10.07
+2023-IV,clase,Económica - Social,10.37
+2024-I,clase,Económica - Social,10.52
+2024-II,clase,Económica - Social,10.69
+2024-III,clase,Económica - Social,10.96
+2024-IV,clase,Económica - Social,10.73
+2025-I,clase,Económica - Social,10.48
+2025-II,clase,Económica - Social,11.31
+2025-III,clase,Económica - Social,11.49
+2025-IV,clase,Económica - Social,11.34
+
+* Cifras preliminares
+* Fuente: Sociedad Hipotecaria Federal (SHF)
